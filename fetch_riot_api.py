@@ -34,24 +34,20 @@ headers = {
     "X-Riot-Token": RIOT_API_KEY
 }
 
-response = requests.get(get_puuid_url, headers=headers)
+try:
+    response = requests.get(get_puuid_url, headers=headers)
+    puuid = response.json()['puuid']
+    print(response.json())
+    print(puuid)
+except Exception as e:
+    print(f"Error: {e}")
 
-# Extract puuid from response
-puuid = response.json()['puuid']
-print(response.json())
-print(puuid)
+if puuid is None:
+    raise ValueError("PUUID not found in response! Please check your .env file.")
+else:
+    print(f"PUUID found: {puuid}")
 
-# 4) Investigate example structure of match data
-match = watcher.match.by_id(my_region, last_match)
-print(type(match))
-print(f"Keys of match: {match.keys()}")
-print(f"Keys of info (attributes for feature engineering): {match['info'].keys()}")
-print(f"Values of info: {match['info'].values()}")
-print(f"Keys of metadata: {match['metadata'].keys()}")
-print(f"Values of metadata: {match['metadata'].values()}")
-print(match)
-
-# 5) Feature Selection: Select attributes that contribute to win or lose
+# 4) Feature Selection: Select attributes that contribute to win or lose
 
 selected_attributes = [
     # Participant basic info
@@ -143,7 +139,7 @@ print(f"  Spells: 4")
 print(f"  Other: 3")
 print(f"  Challenges container: 1")
 
-# 6) Get all match_ids to use that to retrieve match data (API limits only 100 match_ids possible at a time)
+# 5) Get all match_ids to use that to retrieve match data (API limits only 100 match_ids possible at a time)
 def get_all_ranked_match_ids(watcher, region, puuid):
     """Retrieve all ranked match IDs (100 per request max)"""
     all_match_ids = []
@@ -161,11 +157,18 @@ def get_all_ranked_match_ids(watcher, region, puuid):
     return all_match_ids
 
 all_match_ids = get_all_ranked_match_ids(watcher, routing_region, puuid)
-print(len(all_match_ids))
+print(f"Total match IDs retrieved: {len(all_match_ids)}")
 
-# Investigate data structure: one match has 10 entries for each player (5 vs 5)
-unique_match_ids = df['matchId'].unique()
-print(f"Number of unique match IDs: {len(unique_match_ids)}")
+# 6) # Investigate data structure: one match has 10 entries for each player (5 vs 5)
+example_match_id = all_match_ids[0]
+match = watcher.match.by_id(my_region, example_match_id)
+print(type(match))
+print(f"Keys of match: {match.keys()}")
+print(f"Keys of info (attributes for feature engineering): {match['info'].keys()}")
+print(f"Values of info: {match['info'].values()}")
+print(f"Keys of metadata: {match['metadata'].keys()}")
+print(f"Values of metadata: {match['metadata'].values()}")
+print(match)
 
 # 7) Extract data from all matches: Iterate through all 938 matches to retrieve selected attributes using match.by_id 
 def get_match_dataframe(watcher, region, match_ids, selected_attributes):
@@ -239,7 +242,7 @@ def get_match_dataframe(watcher, region, match_ids, selected_attributes):
 
 # Process ALL match IDs with selected attributes#
 df_all_matches = get_match_dataframe(watcher, routing_region, all_match_ids, selected_attributes)
-df_all_matches.to_excel('all_matches_data.xlsx', index=False, engine='openpyxl')
+df_all_matches.to_excel('all_matches_data_py.xlsx', index=False, engine='openpyxl')
 print("="*70)
 print("EXTRACTING DATA FROM ALL MATCHES")
 print("="*70)
