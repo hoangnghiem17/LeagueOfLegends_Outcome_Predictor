@@ -53,6 +53,9 @@ selected_attributes = [
     # Participant basic info
     'championName',
     'summonerName',
+    'queueId',
+    'gameMode',
+    'gameType',
     
     # Win/Loss (target variable)
     'win',
@@ -163,12 +166,12 @@ print(f"Total match IDs retrieved: {len(all_match_ids)}")
 example_match_id = all_match_ids[0]
 match = watcher.match.by_id(my_region, example_match_id)
 print(type(match))
-print(f"Keys of match: {match.keys()}")
-print(f"Keys of info (attributes for feature engineering): {match['info'].keys()}")
-print(f"Values of info: {match['info'].values()}")
-print(f"Keys of metadata: {match['metadata'].keys()}")
-print(f"Values of metadata: {match['metadata'].values()}")
-print(match)
+#print(f"Keys of match: {match.keys()}")
+#print(f"Keys of info (attributes for feature engineering): {match['info'].keys()}")
+#print(f"Values of info: {match['info'].values()}")
+#print(f"Keys of metadata: {match['metadata'].keys()}")
+#print(f"Values of metadata: {match['metadata'].values()}")
+#print(match)
 
 # 7) Extract data from all matches: Iterate through all 938 matches to retrieve selected attributes using match.by_id 
 def get_match_dataframe(watcher, region, match_ids, selected_attributes):
